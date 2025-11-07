@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const lazyRoutes = require('./routes/lazy.routes');
-
+const userRoutes = require('./routes/user.routes');
 const nodeRoutes = require('./routes/node.routes');
 const assessmentRoutes = require('./routes/assessment.routes');
 const questionRoutes = require('./routes/question.routes');
@@ -14,7 +14,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/nodes', nodeRoutes);
+app.use('/api/nodes', nodeRoutes); 
+app.use('/api/users', userRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/answers', answerRoutes);
