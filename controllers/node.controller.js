@@ -2,7 +2,10 @@ const Node = require('../models/node.model');
 
 exports.createNode = async (req, res) => {
   try {
-    const node = await Node.create(req.body);
+    // Ensure createdBy is the authenticated user (if available)
+    const payload = Object.assign({}, req.body);
+    if (req.user && req.user._id) payload.createdBy = req.user._id;
+    const node = await Node.create(payload);
     res.status(201).json(node);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -30,7 +33,10 @@ exports.getNodeById = async (req, res) => {
 
 exports.updateNode = async (req, res) => {
   try {
-    const node = await Node.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // Track who updated the node when authenticated
+    const updates = Object.assign({}, req.body);
+    if (req.user && req.user._id) updates.updatedBy = req.user._id;
+    const node = await Node.findByIdAndUpdate(req.params.id, updates, { new: true });
     res.json(node);
   } catch (err) {
     res.status(400).json({ error: err.message });

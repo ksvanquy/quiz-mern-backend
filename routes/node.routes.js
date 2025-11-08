@@ -1,11 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const nodeController = require('../controllers/node.controller');
+const { authenticate, authorize } = require('../middleware/auth.middleware');
 
-router.post('/', nodeController.createNode);
+// Create: require authenticated user (teacher/admin)
+router.post('/', authenticate, authorize(['admin', 'teacher']), nodeController.createNode);
+// Read (list) - public
 router.get('/', nodeController.getAllNodes);
+// Read (single) - public
 router.get('/:id', nodeController.getNodeById);
-router.put('/:id', nodeController.updateNode);
-router.delete('/:id', nodeController.deleteNode);
+// Update - require authenticated user (teacher/admin)
+router.put('/:id', authenticate, authorize(['admin', 'teacher']), nodeController.updateNode);
+// Delete - restrict to admin
+router.delete('/:id', authenticate, authorize(['admin']), nodeController.deleteNode);
 
 module.exports = router;
