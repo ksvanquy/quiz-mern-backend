@@ -8,12 +8,14 @@ const nodeRoutes = require('./routes/node.routes');
 const assessmentRoutes = require('./routes/assessment.routes');
 const questionRoutes = require('./routes/question.routes');
 const answerRoutes = require('./routes/answer.routes');
+const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/auth', authRoutes); 
 app.use('/api/nodes', nodeRoutes); 
 app.use('/api/users', userRoutes);
 app.use('/api/assessments', assessmentRoutes);

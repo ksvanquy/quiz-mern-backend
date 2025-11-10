@@ -1,12 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user.model');
 const userController = require('../controllers/user.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
-
-// Auth routes
-router.post('/register', userController.register);
-router.post('/login', userController.login);
 
 // User routes
 router.get('/', authenticate, authorize(['admin']), userController.getAllUsers); 
