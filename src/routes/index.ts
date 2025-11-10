@@ -7,6 +7,7 @@ import questionRoutes from "./question.routes";
 import answerRoutes from "./answer.routes";
 import lazyRoutes from "./lazy.routes";
 
+
 const router = Router();
 
 // ✅ Gom tất cả route modules với prefix thống nhất
@@ -17,5 +18,6 @@ router.use("/assessments", assessmentRoutes);
 router.use("/questions", questionRoutes);
 router.use("/answers", answerRoutes);
 router.use("/lazy", lazyRoutes);
+
 
 export default router;
