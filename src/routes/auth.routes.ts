@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
-import { authenticate, authorize } from "../middlewares/auth.middleware";
+import { authenticate } from "../middlewares/auth.middleware";
+import { authorize } from "../middlewares/role.middleware";
 
 const router = Router();
 const authController = new AuthController();
@@ -10,6 +11,9 @@ router.post("/register", (req, res) => authController.register(req, res));
 
 // Login
 router.post("/login", (req, res) => authController.login(req, res));
+
+// Lấy access token mới
+router.post("/refresh", (req, res) => authController.refresh(req, res));
 
 // Admin tạo user với role tùy ý
 router.post(

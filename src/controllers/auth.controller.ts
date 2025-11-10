@@ -39,19 +39,33 @@ export class AuthController {
     }
   }
 
-  // Login
   async login(req: Request, res: Response) {
     try {
       const { email, password } = req.body;
-      const { token, user } = await authService.login(email, password);
+      const result = await authService.login(email, password);
+      res.json({ message: "Đăng nhập thành công", ...result });
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
+  }
 
-      res.json({
-        message: "Đăng nhập thành công",
-        token,
-        user, // trả về user safe
-      });
-    } catch (error: any) {
-      res.status(400).json({ message: error.message });
+  async refresh(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+      const tokens = await authService.refreshToken(refreshToken);
+      res.json(tokens);
+    } catch (err: any) {
+      res.status(401).json({ message: err.message });
+    }
+  }
+
+  async logout(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+      await authService.logout(refreshToken);
+      res.json({ message: "Đã logout" });
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
     }
   }
 }

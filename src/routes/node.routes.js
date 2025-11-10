@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const nodeController = require('../controllers/node.controller');
-const { authenticate, authorize } = require('../middlewares/auth.middleware');
+const { authenticate } = require('../middlewares/auth.middleware');
+const { authorize } = require('../middlewares/role.middleware');
 
 // Create: require authenticated user (teacher/admin)
 router.post('/', authenticate, authorize(['admin', 'teacher']), nodeController.createNode);
