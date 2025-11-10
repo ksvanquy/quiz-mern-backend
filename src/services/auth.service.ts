@@ -2,7 +2,23 @@ import User from "../models/user.model";
 import { generateToken } from "../utils/generateTokens";
 
 export class AuthService {
-  async register(name: string, email: string, password: string, role: string) {
+
+    // Register user bình thường
+  async register(name: string, email: string, password: string) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new Error("Email đã tồn tại");
+    }
+
+    // Luôn mặc định role là student
+    const user = new User({ name, email, password, role: "student" });
+    await user.save();
+
+    return user;
+  }
+
+  // Chỉ admin mới có quyền tạo user với role tùy ý
+  async createUserByAdmin(name: string, email: string, password: string, role: string) {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       throw new Error("Email đã tồn tại");

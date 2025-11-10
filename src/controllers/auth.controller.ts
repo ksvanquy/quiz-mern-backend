@@ -4,14 +4,30 @@ import { AuthService } from "../services/auth.service";
 const authService = new AuthService();
 
 export class AuthController {
+
+   // Register user bình thường
   async register(req: Request, res: Response) {
     try {
-      const { name, email, password, role } = req.body;
-
-      const user = await authService.register(name, email, password, role);
+      const { name, email, password } = req.body; // loại bỏ role
+      const user = await authService.register(name, email, password);
 
       res.status(201).json({
         message: "Đăng ký thành công",
+        userId: user._id,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
+    // Admin tạo user (nếu cần)
+  async createUserByAdmin(req: Request, res: Response) {
+    try {
+      const { name, email, password, role } = req.body;
+      const user = await authService.createUserByAdmin(name, email, password, role);
+
+      res.status(201).json({
+        message: "Tạo user thành công",
         userId: user._id,
       });
     } catch (error: any) {
