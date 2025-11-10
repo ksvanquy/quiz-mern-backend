@@ -1,46 +1,53 @@
-import User from "../models/user.model";
+import User, { IUser } from "../models/user.model";
+import bcrypt from "bcrypt";
 import { generateToken } from "../utils/generateTokens";
+
+export type UserSafe = {
+  _id: string;
+  name: string;
+  email: string;
+  role: "student" | "teacher" | "admin";
+};
 
 export class AuthService {
 
-    // Register user bình thường
-  async register(name: string, email: string, password: string) {
+  // Register user bình thường (role luôn là student)
+  async register(name: string, email: string, password: string): Promise<UserSafe> {
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new Error("Email đã tồn tại");
-    }
+    if (existingUser) throw new Error("Email đã tồn tại");
 
-    // Luôn mặc định role là student
-    const user = new User({ name, email, password, role: "student" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ name, email, password: hashedPassword, role: "student" });
     await user.save();
 
-    return user;
+    const { password: _pwd, ...userData } = user.toObject();
+    return userData as UserSafe;
   }
 
-  // Chỉ admin mới có quyền tạo user với role tùy ý
-  async createUserByAdmin(name: string, email: string, password: string, role: string) {
+  // Admin tạo user với role tùy ý
+  async createUserByAdmin(name: string, email: string, password: string, role: "student" | "teacher" | "admin"): Promise<UserSafe> {
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new Error("Email đã tồn tại");
-    }
+    if (existingUser) throw new Error("Email đã tồn tại");
 
-    const user = new User({ name, email, password, role });
+    const hashedPassword = await bcrypt.hash(password, 10); // hash password
+    const user = new User({ name, email, password: hashedPassword, role });
     await user.save();
 
-    return user;
+    const { password: _pwd, ...userData } = user.toObject();
+    return userData as UserSafe;
   }
 
-  async login(email: string, password: string) {
+  // Login
+  async login(email: string, password: string): Promise<{ token: string; user: UserSafe }> {
     const user = await User.findOne({ email });
-
     if (!user) throw new Error("Email không tồn tại");
 
-    const isMatch = await user.comparePassword(password);
-
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Sai mật khẩu");
 
     const token = generateToken({ userId: user._id, role: user.role });
 
-    return { token, user };
+    const { password: _pwd, ...userData } = user.toObject();
+    return { token, user: userData as UserSafe };
   }
 }
