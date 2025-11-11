@@ -5,6 +5,7 @@ import nodeRoutes from "./node.routes";
 import assessmentRoutes from "./assessment.routes";
 import questionRoutes from "./question.routes";
 import answerRoutes from "./answer.routes";
+import attemptRoutes from "./attempt.routes";
 import lazyRoutes from "./lazy.routes";
 
 
@@ -17,6 +18,7 @@ router.use("/nodes", nodeRoutes);
 router.use("/assessments", assessmentRoutes);
 router.use("/questions", questionRoutes);
 router.use("/answers", answerRoutes);
+router.use("/attempts", attemptRoutes);
 router.use("/lazy", lazyRoutes);
 
 
