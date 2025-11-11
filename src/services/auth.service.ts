@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 // import { generateTokens } from "../utils/generateTokens";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens";
 import jwt from "jsonwebtoken";
+import { verifyRefreshToken } from "../utils/verifyToken";
 // import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../config/env";
 
 export type UserSafe = {
@@ -61,11 +62,10 @@ export class AuthService {
 
   // Refresh token
   async refreshToken(oldRefreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const jwt = require("jsonwebtoken");
     let payload: any;
 
     try {
-      payload = jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN_SECRET || "your_refresh_token_secret");
+      payload = verifyRefreshToken(oldRefreshToken, process.env.REFRESH_TOKEN_SECRET || "your_refresh_token_secret");
     } catch {
       throw new Error("Refresh token không hợp lệ hoặc hết hạn");
     }
