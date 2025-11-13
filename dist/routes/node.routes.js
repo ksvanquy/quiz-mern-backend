@@ -1,11 +1,11 @@
-import { Router } from "express";
-import { NodeController } from "../controllers/node.controller";
-import { authenticate } from "../middlewares/auth.middleware";
-import { authorize } from "../middlewares/role.middleware";
-
-const router = Router();
-const controller = new NodeController();
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const node_controller_1 = require("../controllers/node.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const role_middleware_1 = require("../middlewares/role.middleware");
+const router = (0, express_1.Router)();
+const controller = new node_controller_1.NodeController();
 /**
  * @swagger
  * /nodes:
@@ -41,13 +41,7 @@ const controller = new NodeController();
  *       500:
  *         description: Server error
  */
-router.post(
-  "/",
-  authenticate,
-  authorize(["admin", "teacher"]),
-  controller.createNode
-);
-
+router.post("/", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin", "teacher"]), controller.createNode);
 /**
  * @swagger
  * /nodes:
@@ -69,7 +63,6 @@ router.post(
  *         description: Server error
  */
 router.get("/", controller.getAllNodes);
-
 /**
  * @swagger
  * /nodes/{id}:
@@ -92,7 +85,6 @@ router.get("/", controller.getAllNodes);
  *         description: Server error
  */
 router.get("/:id", controller.getNodeById);
-
 /**
  * @swagger
  * /nodes/{id}:
@@ -133,13 +125,7 @@ router.get("/:id", controller.getNodeById);
  *       500:
  *         description: Server error
  */
-router.put(
-  "/:id",
-  authenticate,
-  authorize(["admin", "teacher"]),
-  controller.updateNode
-);
-
+router.put("/:id", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin", "teacher"]), controller.updateNode);
 /**
  * @swagger
  * /nodes/{id}:
@@ -167,11 +153,5 @@ router.put(
  *       500:
  *         description: Server error
  */
-router.delete(
-  "/:id",
-  authenticate,
-  authorize(["admin"]),
-  controller.deleteNode
-);
-
-export default router;
+router.delete("/:id", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin"]), controller.deleteNode);
+exports.default = router;

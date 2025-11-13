@@ -1,11 +1,11 @@
-import { Router } from "express";
-import { UserController } from "../controllers/user.controller";
-import { authenticate } from "../middlewares/auth.middleware";
-import { authorize } from "../middlewares/role.middleware";
-
-const router = Router();
-const userController = new UserController();
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const user_controller_1 = require("../controllers/user.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const role_middleware_1 = require("../middlewares/role.middleware");
+const router = (0, express_1.Router)();
+const userController = new user_controller_1.UserController();
 /**
  * @swagger
  * /users/me:
@@ -38,9 +38,7 @@ const userController = new UserController();
  *         description: Server error
  */
 // User routes (profile) nên đặt **trước** /:id
-router.get("/me", authenticate, (req, res) =>
-  userController.getProfile(req, res)
-);
+router.get("/me", auth_middleware_1.authenticate, (req, res) => userController.getProfile(req, res));
 /**
  * @swagger
  * /users/me:
@@ -70,10 +68,8 @@ router.get("/me", authenticate, (req, res) =>
  *       500:
  *         description: Server error
  */
-router.put("/me", authenticate, (req, res) =>
-  userController.updateProfile(req, res) // validate không cho sửa role
+router.put("/me", auth_middleware_1.authenticate, (req, res) => userController.updateProfile(req, res) // validate không cho sửa role
 );
-
 /**
  * @swagger
  * /users:
@@ -95,9 +91,7 @@ router.put("/me", authenticate, (req, res) =>
  *         description: Server error
  */
 // Admin routes
-router.get("/", authenticate, authorize(["admin"]), (req, res) =>
-  userController.getAllUsers(req, res)
-);
+router.get("/", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin"]), (req, res) => userController.getAllUsers(req, res));
 /**
  * @swagger
  * /users/{id}:
@@ -126,9 +120,7 @@ router.get("/", authenticate, authorize(["admin"]), (req, res) =>
  *       500:
  *         description: Server error
  */
-router.get("/:id", authenticate, authorize(["admin"]), (req, res) =>
-  userController.getUserById(req, res)
-);
+router.get("/:id", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin"]), (req, res) => userController.getUserById(req, res));
 /**
  * @swagger
  * /users/{id}:
@@ -170,9 +162,7 @@ router.get("/:id", authenticate, authorize(["admin"]), (req, res) =>
  *       500:
  *         description: Server error
  */
-router.put("/:id", authenticate, authorize(["admin"]), (req, res) =>
-  userController.updateUser(req, res)
-);
+router.put("/:id", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin"]), (req, res) => userController.updateUser(req, res));
 /**
  * @swagger
  * /users/{id}:
@@ -200,8 +190,5 @@ router.put("/:id", authenticate, authorize(["admin"]), (req, res) =>
  *       500:
  *         description: Server error
  */
-router.delete("/:id", authenticate, authorize(["admin"]), (req, res) =>
-  userController.deleteUser(req, res)
-);
-
-export default router;
+router.delete("/:id", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin"]), (req, res) => userController.deleteUser(req, res));
+exports.default = router;

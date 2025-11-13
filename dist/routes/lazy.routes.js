@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const lazy_controller_1 = require("../controllers/lazy.controller");
+const router = (0, express_1.Router)();
+const lazyController = new lazy_controller_1.LazyController();
+router.get("/nodes", (req, res) => lazyController.getNodesByParent(req, res));
+router.get("/assessments", (req, res) => lazyController.getAssessmentsByNode(req, res));
+router.get("/questions", (req, res) => lazyController.getQuestionsByAssessment(req, res));
+router.get("/answers", (req, res) => lazyController.getAnswersByQuestion(req, res));
+exports.default = router;

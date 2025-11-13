@@ -1,11 +1,11 @@
-import { Router } from "express";
-import { AuthController } from "../controllers/auth.controller";
-import { authenticate } from "../middlewares/auth.middleware";
-import { authorize } from "../middlewares/role.middleware";
-
-const router = Router();
-const authController = new AuthController();
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_controller_1 = require("../controllers/auth.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const role_middleware_1 = require("../middlewares/role.middleware");
+const router = (0, express_1.Router)();
+const authController = new auth_controller_1.AuthController();
 /**
  * @swagger
  * /auth/register:
@@ -63,7 +63,6 @@ const authController = new AuthController();
  */
 // User đăng ký bình thường (role mặc định student)
 router.post("/register", (req, res) => authController.register(req, res));
-
 /**
  * @swagger
  * /auth/login:
@@ -114,7 +113,6 @@ router.post("/register", (req, res) => authController.register(req, res));
  */
 // Login
 router.post("/login", (req, res) => authController.login(req, res));
-
 /**
  * @swagger
  * /auth/refresh:
@@ -154,7 +152,6 @@ router.post("/login", (req, res) => authController.login(req, res));
  */
 // Lấy access token mới
 router.post("/refresh", (req, res) => authController.refresh(req, res));
-
 /**
  * @swagger
  * /auth/create-user:
@@ -201,10 +198,5 @@ router.post("/refresh", (req, res) => authController.refresh(req, res));
  *         description: Server error
  */
 // Admin tạo user với role tùy ý
-router.post(
-  "/create-user",
-  authenticate,
-  authorize(["admin"]),
-  (req, res) => authController.createUserByAdmin(req, res)
-);
-export default router;
+router.post("/create-user", auth_middleware_1.authenticate, (0, role_middleware_1.authorize)(["admin"]), (req, res) => authController.createUserByAdmin(req, res));
+exports.default = router;

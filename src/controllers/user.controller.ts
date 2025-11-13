@@ -63,7 +63,7 @@ export class UserController {
         updates.password = await bcrypt.hash(updates.password, 10);
       }
 
-      const user = await userService.updateUser(req.user!._id, updates);
+      const user = await userService.updateUser(req.user!.userId, updates);
       res.json(user);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
