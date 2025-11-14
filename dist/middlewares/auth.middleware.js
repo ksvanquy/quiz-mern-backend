@@ -7,19 +7,18 @@ const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = (0, verifyToken_1.extractBearerToken)(authHeader);
     if (!token) {
-        console.log("No Authorization header or invalid Bearer format");
+        console.log("[AUTH] Missing or invalid Authorization header");
         return res.status(401).json({ message: "Unauthorized" });
     }
     try {
-        console.log("Token received:", token);
-        console.log("Using secret:", env_1.ACCESS_TOKEN_SECRET);
         const payload = (0, verifyToken_1.verifyAccessToken)(token, env_1.ACCESS_TOKEN_SECRET);
-        console.log("Payload:", payload);
+        // Log only non-sensitive info
+        console.log("[AUTH] Token verified successfully for user:", payload.userId);
         req.user = payload;
         next();
     }
     catch (err) {
-        console.error("JWT verify error:", err.message);
+        console.error("[AUTH] Token verification failed:", err.message);
         res.status(401).json({ message: "Token không hợp lệ" });
     }
 };

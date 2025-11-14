@@ -1,10 +1,8 @@
 import User, { IUser } from "../models/user.model";
 import bcrypt from "bcrypt";
-// import { generateTokens } from "../utils/generateTokens";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens";
-import jwt from "jsonwebtoken";
 import { verifyRefreshToken } from "../utils/verifyToken";
-// import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../config/env";
+import crypto from 'crypto';
 
 export type UserSafe = {
   _id: string;
@@ -20,7 +18,7 @@ export class AuthService {
     const existingUser = await User.findOne({ email });
     if (existingUser) throw new Error("Email đã tồn tại");
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12); // Increased from 10 to 12 for better security
     const user = new User({ name, email, password: hashedPassword, role: "student" });
     await user.save();
 
@@ -33,7 +31,7 @@ export class AuthService {
     const existingUser = await User.findOne({ email });
     if (existingUser) throw new Error("Email đã tồn tại");
 
-    const hashedPassword = await bcrypt.hash(password, 10); // hash password
+    const hashedPassword = await bcrypt.hash(password, 12); // Increased from 10 to 12 for better security
     const user = new User({ name, email, password: hashedPassword, role });
     await user.save();
 
@@ -52,8 +50,9 @@ export class AuthService {
     const accessToken = generateAccessToken({ userId: user._id, role: user.role });
     const refreshToken = generateRefreshToken({ userId: user._id, role: user.role });
 
-    // Lưu refresh token vào DB
-    user.refreshTokens.push(refreshToken);
+    // Hash the refresh token before saving to DB to avoid storing raw tokens
+    const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    user.refreshTokens.push(hashed);
     await user.save();
 
     const { password: _pwd, refreshTokens, ...userData } = user.toObject();
@@ -73,16 +72,18 @@ export class AuthService {
     const user = await User.findById(payload.userId);
     if (!user) throw new Error("User không tồn tại");
 
-    // Kiểm tra token có còn trong DB không
-    if (!user.refreshTokens.includes(oldRefreshToken)) throw new Error("Refresh token đã bị revoke");
+    // Kiểm tra token có còn trong DB không (compare hashed value)
+    const oldHash = crypto.createHash('sha256').update(oldRefreshToken).digest('hex');
+    if (!user.refreshTokens.includes(oldHash)) throw new Error("Refresh token đã bị revoke");
 
     // Tạo token mới
     const accessToken = generateAccessToken({ userId: user._id, role: user.role });
     const refreshToken = generateRefreshToken({ userId: user._id, role: user.role });
 
-    // Xoá token cũ và thêm token mới (rotate token)
-    user.refreshTokens = user.refreshTokens.filter(t => t !== oldRefreshToken);
-    user.refreshTokens.push(refreshToken);
+    // Xoá token cũ (hashed) và thêm token mới (hashed)
+    user.refreshTokens = user.refreshTokens.filter(t => t !== oldHash);
+    const newHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    user.refreshTokens.push(newHash);
     await user.save();
 
     return { accessToken, refreshToken };
@@ -96,7 +97,9 @@ export class AuthService {
     const user = await User.findById(payload.userId);
     if (!user) return;
 
-    user.refreshTokens = user.refreshTokens.filter(t => t !== refreshToken);
+    // Remove hashed version of the token
+    const hashed = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    user.refreshTokens = user.refreshTokens.filter(t => t !== hashed);
     await user.save();
   }
 }
