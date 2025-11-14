@@ -9,9 +9,9 @@ export class LazyController {
     try {
       const { parentId } = req.query;
       const nodes = await lazyService.getNodesByParent(parentId as string);
-      res.json(nodes);
+      res.apiSuccess?.(nodes, 'Nodes retrieved successfully', 200);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 
@@ -24,9 +24,9 @@ export class LazyController {
         Number(page),
         Number(limit)
       );
-      res.json(result);
+      res.apiSuccess?.(result, 'Assessments retrieved successfully', 200);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 
@@ -39,9 +39,9 @@ export class LazyController {
         Number(page),
         Number(limit)
       );
-      res.json(result);
+      res.apiSuccess?.(result, 'Questions retrieved successfully', 200);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 
@@ -50,9 +50,9 @@ export class LazyController {
     try {
       const { questionId } = req.query;
       const answers = await lazyService.getAnswersByQuestion(questionId as string);
-      res.json(answers);
+      res.apiSuccess?.(answers, 'Answers retrieved successfully', 200);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 }

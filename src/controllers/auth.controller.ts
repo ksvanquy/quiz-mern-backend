@@ -7,7 +7,22 @@ const authService = new AuthService();
 
 export class AuthController {
 
-  // Register bình thường (role luôn student)
+  /**
+   * Parse device name from User-Agent header
+   */
+  private parseDeviceName(userAgent?: string): string {
+    if (!userAgent) return 'Unknown Device';
+
+    // Simple parsing: extract browser and OS info
+    if (userAgent.includes('Chrome')) return 'Chrome';
+    if (userAgent.includes('Firefox')) return 'Firefox';
+    if (userAgent.includes('Safari')) return 'Safari';
+    if (userAgent.includes('Edge')) return 'Edge';
+    if (userAgent.includes('Opera')) return 'Opera';
+    if (userAgent.includes('Mobile')) return 'Mobile Browser';
+
+    return userAgent.substring(0, 50);
+  }
   async register(req: Request, res: Response) {
     try {
       const { name, email, password } = req.body;
@@ -119,7 +134,12 @@ export class AuthController {
         ]));
       }
 
-      const result = await authService.login(email, password);
+      // Extract device information from request
+      const userAgent = req.get('user-agent');
+      const ipAddress = req.ip || req.socket.remoteAddress || '';
+      const deviceName = this.parseDeviceName(userAgent);
+
+      const result = await authService.login(email, password, userAgent, ipAddress, deviceName);
 
       // Set refresh token as HttpOnly secure cookie
       const refreshToken = result.refreshToken;
@@ -158,7 +178,11 @@ export class AuthController {
         return res.apiError?.({ title: 'Refresh token missing', status: 400, detail: 'Refresh token is required' });
       }
 
-      const tokens = await authService.refreshToken(refreshToken);
+      // Extract device information from request
+      const userAgent = req.get('user-agent');
+      const ipAddress = req.ip || req.socket.remoteAddress || '';
+
+      const tokens = await authService.refreshToken(refreshToken, userAgent, ipAddress);
 
       // Rotate cookie with new refresh token
       res.cookie('refreshToken', tokens.refreshToken, {

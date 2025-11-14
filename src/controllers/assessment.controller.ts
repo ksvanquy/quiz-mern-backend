@@ -6,7 +6,7 @@ export class AssessmentController {
     try {
       const user = req.user; // đã có type { userId, role }
 
-      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!user) return res.apiError?.({ type: '/errors/auth', title: 'Authentication Error', status: 401, detail: 'Unauthorized' });
 
       const payload = {
         ...req.body,
@@ -15,19 +15,18 @@ export class AssessmentController {
 
       const assessment = await assessmentService.createAssessment(payload);
 
-      return res.status(201).json(assessment);
+      return res.apiSuccess?.(assessment, 'Assessment created successfully', 201);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/create', title: 'Create Error', status: 400, detail: err.message });
     }
   }
-
 
   async getAll(req: Request, res: Response) {
     try {
       const assessments = await assessmentService.getAllAssessments();
-      return res.json(assessments);
+      return res.apiSuccess?.(assessments, 'Assessments retrieved successfully', 200);
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 
@@ -35,18 +34,18 @@ export class AssessmentController {
     try {
       const assessment = await assessmentService.getAssessmentById(req.params.id);
       if (!assessment) {
-        return res.status(404).json({ error: "Assessment not found" });
+        return res.apiError?.({ type: '/errors/not_found', title: 'Not Found', status: 404, detail: 'Assessment not found' });
       }
-      return res.json(assessment);
+      return res.apiSuccess?.(assessment, 'Assessment retrieved successfully', 200);
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 
   async update(req: Request, res: Response) {
     try {
       const user = req.user;
-      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!user) return res.apiError?.({ type: '/errors/auth', title: 'Authentication Error', status: 401, detail: 'Unauthorized' });
 
       const payload = {
         ...req.body,
@@ -55,18 +54,18 @@ export class AssessmentController {
 
       const updated = await assessmentService.updateAssessment(req.params.id, payload);
 
-      if (!updated) return res.status(404).json({ error: "Assessment not found" });
+      if (!updated) return res.apiError?.({ type: '/errors/not_found', title: 'Not Found', status: 404, detail: 'Assessment not found' });
 
-      return res.json(updated);
+      return res.apiSuccess?.(updated, 'Assessment updated successfully', 200);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/update', title: 'Update Error', status: 400, detail: err.message });
     }
   }
 
   async delete(req: Request, res: Response) {
     try {
       const user = req.user;
-      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!user) return res.apiError?.({ type: '/errors/auth', title: 'Authentication Error', status: 401, detail: 'Unauthorized' });
 
       const result = await assessmentService.deleteAssessmentWithOwnerCheck(
         req.params.id,
@@ -74,15 +73,15 @@ export class AssessmentController {
         user.role
       );
 
-      if (!result) return res.status(404).json({ message: "Assessment not found" });
+      if (!result) return res.apiError?.({ type: '/errors/not_found', title: 'Not Found', status: 404, detail: 'Assessment not found' });
       if (result.reason === "not_owner")
-        return res.status(403).json({ message: "Teacher chỉ có thể xoá Assessment do chính mình tạo" });
+        return res.apiError?.({ type: '/errors/forbidden', title: 'Forbidden', status: 403, detail: 'Teacher chỉ có thể xoá Assessment do chính mình tạo' });
       if (result.reason === "forbidden")
-        return res.status(403).json({ message: "Bạn không có quyền xoá Assessment" });
+        return res.apiError?.({ type: '/errors/forbidden', title: 'Forbidden', status: 403, detail: 'Bạn không có quyền xoá Assessment' });
 
-      return res.json({ message: "Assessment deleted" });
+      return res.apiSuccess?.(null, 'Assessment deleted successfully', 200);
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/delete', title: 'Delete Error', status: 500, detail: err.message });
     }
   }
 

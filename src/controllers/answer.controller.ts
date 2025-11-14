@@ -5,7 +5,7 @@ export class AnswerController {
   async create(req: Request, res: Response) {
     try {
       const user = req.user;
-      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!user) return res.apiError?.({ type: '/errors/auth', title: 'Authentication Error', status: 401, detail: 'Unauthorized' });
 
       const payload = {
         ...req.body,
@@ -13,35 +13,35 @@ export class AnswerController {
       };
 
       const answer = await answerService.createAnswer(payload);
-      return res.status(201).json(answer);
+      return res.apiSuccess?.(answer, 'Answer created successfully', 201);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/create', title: 'Create Error', status: 400, detail: err.message });
     }
   }
 
   async getAll(req: Request, res: Response) {
     try {
       const answers = await answerService.getAllAnswers();
-      return res.json(answers);
+      return res.apiSuccess?.(answers, 'Answers retrieved successfully', 200);
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 
   async getById(req: Request, res: Response) {
     try {
       const answer = await answerService.getAnswerById(req.params.id);
-      if (!answer) return res.status(404).json({ error: "Answer not found" });
-      return res.json(answer);
+      if (!answer) return res.apiError?.({ type: '/errors/not_found', title: 'Not Found', status: 404, detail: 'Answer not found' });
+      return res.apiSuccess?.(answer, 'Answer retrieved successfully', 200);
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/server', title: 'Server Error', status: 500, detail: err.message });
     }
   }
 
   async update(req: Request, res: Response) {
     try {
       const user = req.user;
-      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!user) return res.apiError?.({ type: '/errors/auth', title: 'Authentication Error', status: 401, detail: 'Unauthorized' });
 
       const payload = {
         ...req.body,
@@ -49,18 +49,18 @@ export class AnswerController {
       };
 
       const updated = await answerService.updateAnswer(req.params.id, payload);
-      if (!updated) return res.status(404).json({ error: "Answer not found" });
+      if (!updated) return res.apiError?.({ type: '/errors/not_found', title: 'Not Found', status: 404, detail: 'Answer not found' });
 
-      return res.json(updated);
+      return res.apiSuccess?.(updated, 'Answer updated successfully', 200);
     } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/update', title: 'Update Error', status: 400, detail: err.message });
     }
   }
 
   async delete(req: Request, res: Response) {
     try {
       const user = req.user;
-      if (!user) return res.status(401).json({ message: "Unauthorized" });
+      if (!user) return res.apiError?.({ type: '/errors/auth', title: 'Authentication Error', status: 401, detail: 'Unauthorized' });
 
       const result = await answerService.deleteAnswerWithOwnerCheck(
         req.params.id,
@@ -68,15 +68,15 @@ export class AnswerController {
         user.role
       );
 
-      if (!result) return res.status(404).json({ message: "Answer not found" });
+      if (!result) return res.apiError?.({ type: '/errors/not_found', title: 'Not Found', status: 404, detail: 'Answer not found' });
       if (result.reason === "not_owner")
-        return res.status(403).json({ message: "Teacher chỉ có thể xoá Answer do chính mình tạo" });
+        return res.apiError?.({ type: '/errors/forbidden', title: 'Forbidden', status: 403, detail: 'Teacher chỉ có thể xoá Answer do chính mình tạo' });
       if (result.reason === "forbidden")
-        return res.status(403).json({ message: "Bạn không có quyền xoá Answer" });
+        return res.apiError?.({ type: '/errors/forbidden', title: 'Forbidden', status: 403, detail: 'Bạn không có quyền xoá Answer' });
 
-      return res.json({ message: "Answer deleted" });
+      return res.apiSuccess?.(null, 'Answer deleted successfully', 200);
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      return res.apiError?.({ type: '/errors/delete', title: 'Delete Error', status: 500, detail: err.message });
     }
   }
 }
